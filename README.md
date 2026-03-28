@@ -19,7 +19,8 @@ The system includes:
 - AI Processing Layer (Summarization, Personalization, Q&A)
 - Output Layer
   
-  <img width="500" height="860" alt="image" src="https://github.com/user-attachments/assets/192c6fc0-ba92-4186-8dde-6059674fc557" />
+  <img width="450" height="760" alt="image" src="https://github.com/user-attachments/assets/93c9ccbe-0ad9-4799-9cfa-affa184c2bb7" />
+
 
 ## Tech Stack
 - Frontend: HTML, CSS, JavaScript
