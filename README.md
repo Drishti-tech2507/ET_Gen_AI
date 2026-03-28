@@ -19,13 +19,13 @@ The system includes:
 - AI Processing Layer (Summarization, Personalization, Q&A)
 - Output Layer
   
-  <img width="450" height="760" alt="image" src="https://github.com/user-attachments/assets/93c9ccbe-0ad9-4799-9cfa-affa184c2bb7" />
+  <img width="450" height="760" alt="Untitled" src="https://github.com/user-attachments/assets/8885ea2d-2445-4bda-aac9-88ca0e368969" />
 
 
 ## Tech Stack
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js
-- AI: Mock AI logic (extendable to LLM APIs)
+- Frontend: JavaScript with React, HTML, CSS
+- Backend: Node.js, Express.js
+- AI: News API, Groq AI(LLM)
 
 ## Impact
 - Reduces news reading time by 80%
