@@ -24,13 +24,8 @@ The system includes:
 
 ## Tech Stack
 - Frontend: HTML, CSS, JavaScript
-- Backend: Python Flask
+- Backend: Node.js
 - AI: Mock AI logic (extendable to LLM APIs)
-
-## How to Run
-1. Install Python & Flask
-2. Run: python app.py
-3. Open index.html in browser
 
 ## Impact
 - Reduces news reading time by 80%
