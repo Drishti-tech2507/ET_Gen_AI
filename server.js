@@ -1,4 +1,3 @@
-// server.js
 const Groq = require("groq-sdk");
 const express = require("express");
 const cors = require("cors");
@@ -8,72 +7,126 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Groq SDK with your API key
+// 🔐 Use your Groq API key here
 const groq = new Groq({
   apiKey: "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",
 });
 
-// ✅ Health check
+// ======================
+// HEALTH CHECK
+// ======================
 app.get("/", (req, res) => {
-  res.send("Server running");
+  res.send("🚀 Server running");
 });
 
-// ✅ News route
-app.get("/news", async (req, res) => {
+// ======================
+// SEARCH NEWS
+// ======================
+app.get("/search", async (req, res) => {
+  const query = req.query.q;
+
+  if (!query) return res.status(400).send("Query missing");
+
   try {
     const response = await axios.get(
-      "https://newsapi.org/v2/everything?q=business&language=en&sortBy=publishedAt&apiKey=07b717668c1a436d88d2afe1a335d46a"
+      `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=relevancy&pageSize=12&apiKey=07b717668c1a436d88d2afe1a335d46a`
     );
-    res.json(response.data.articles);
+
+    const cleaned = response.data.articles
+      .filter(a => a.title && a.description)
+      .map(a => ({
+        title: a.title,
+        description: a.description,
+        content: a.content,
+        url: a.url,
+        image: a.urlToImage || "https://via.placeholder.com/400"
+      }));
+
+    res.json(cleaned);
+
   } catch (err) {
-    console.error("NEWS ERROR:", err.response?.data || err.message);
-    res.status(500).send("Error fetching news");
+    console.error("SEARCH ERROR:", err.message);
+    res.status(500).send("Search error");
   }
 });
 
-// ✅ Test AI route
-app.get("/test-ai", async (req, res) => {
-  try {
-    const chatCompletion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // Using your supported model
-      messages: [{ role: "user", content: "Explain stock market in simple words" }],
-      max_tokens: 300,
-    });
+// ======================
+// TRANSLATE (EN → HINDI FIXED)
+// ======================
+app.post("/translate", async (req, res) => {
+  const { text } = req.body;
 
-    res.send(chatCompletion.choices[0]?.message?.content || "No AI response");
-  } catch (err) {
-    console.error("AI ERROR:", err.response?.data || err.message || err);
-    res.status(500).send("AI error");
-  }
-});
-
-// ✅ Analyze route
-app.post("/analyze", async (req, res) => {
-  const { article, portfolio } = req.body;
-  if (!article || !portfolio) return res.status(400).send("Missing article or portfolio");
+  if (!text) return res.status(400).send("Text missing");
 
   try {
-    const prompt = `
-User Portfolio: ${portfolio}
-News: ${article}
-
-1) Give a short summary (3 points)
-2) Explain why this matters
-3) Impact level (High/Medium/Low)
-    `;
-
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // Using your supported model
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 400,
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: `
+Translate the following text strictly into Hindi.
+Keep meaning correct and natural.
+
+Text:
+${text}
+          `
+        }
+      ],
+      max_tokens: 200
     });
 
-    res.json({ result: response.choices[0]?.message?.content || "No response" });
+    res.json({
+      translation: response.choices[0]?.message?.content || "No translation"
+    });
+
   } catch (err) {
-    console.error("AI ERROR:", err.response?.data || err.message || err);
-    res.status(500).send("AI error");
+    console.error("TRANSLATE ERROR:", err.message);
+    res.status(500).send("Translation error");
   }
 });
 
-// ✅ Start server
-app.listen(5000, () => console.log("Server running on port 5000"));
+// ======================
+// CHATBOT (SMART + CLEAN)
+// ======================
+app.post("/chat", async (req, res) => {
+  const { message } = req.body;
+
+  if (!message) return res.status(400).send("Message missing");
+
+  try {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: `
+You are an AI assistant for a business news app.
+
+Explain clearly in simple words.
+Keep answers short (3–5 lines).
+
+User Question:
+${message}
+          `
+        }
+      ],
+      max_tokens: 300
+    });
+
+    res.json({
+      reply: response.choices[0]?.message?.content || "No reply"
+    });
+
+  } catch (err) {
+    console.error("CHAT ERROR:", err.message);
+    res.status(500).send("Chat error");
+  }
+});
+
+// ======================
+// START SERVER
+// ======================
+app.listen(5000, () => {
+  console.log("🚀 Backend running on http://localhost:5000");
+});
